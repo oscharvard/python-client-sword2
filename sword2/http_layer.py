@@ -59,7 +59,7 @@ class HttpLib2Response(HttpResponse):
 
 class HttpLib2Layer(HttpLayer):
     def __init__(self, cache_dir, timeout=30, ca_certs=None):
-        self.h = httplib2.Http(".cache", timeout=30.0, ca_certs=ca_certs)
+        self.h = httplib2.Http(cache=cache_dir, timeout=30.0, ca_certs=ca_certs)
 
     def add_credentials(self, username, password):
         self.h.add_credentials(username, password)
