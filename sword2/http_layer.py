@@ -187,3 +187,47 @@ class UrlLib2Layer(HttpLayer):
                 # unable to read()
                 return UrlLib2Response(e), None
 
+
+################################################################################
+# requests implementation
+################################################################################
+
+import requests
+
+class RequestsResponse(HttpResponse):
+    def __init__(self, response):
+        self.resp = response
+        self.headers = self.resp.headers
+        self.status = int(self.resp.status_code)
+
+    def __getitem__(self, att):
+        if att == "status":
+            return self.status
+        return self.headers[att]
+
+    def get(self, att, default=None):
+        if att == "status":
+            return self.status
+        return self.headers.get(att, default)
+
+    def keys(self):
+        return self.headers.keys() + ["status"]
+
+class RequestsLayer(HttpLayer):
+    def __init__(self):
+        self.h = requests.Session()
+
+    def add_credentials(self, username, password):
+        self.auth = (username, password)
+
+    def request(self, uri, method, headers=None, payload=None):
+        if hasattr(payload, 'read'):
+            # THIS MAY NOT BE NECESSARY - BRS:
+            # Need to work out why a 401 challenge will stop httplib2 from sending the file...
+            # likely need to make it re-seek to 0...
+            # FIXME: In the meantime, read the file into memory... *sigh*
+            payload = payload.read()
+        r = requests.Request(method, uri, headers=headers, data=payload, auth=self.auth)
+        p = r.prepare()
+        response = self.h.send(p, timeout=30.0)
+        return (RequestsResponse(response), response.content)
