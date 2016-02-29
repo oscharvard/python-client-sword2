@@ -13,7 +13,8 @@ from sword2_logging import logging
 from implementation_info import __version__
 coll_l = logging.getLogger(__name__)
 
-from compatible_libs import etree
+#from compatible_libs import etree
+from lxml import etree
 from utils import NS, get_text
 
 from datetime import datetime
