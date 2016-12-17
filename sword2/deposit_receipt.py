@@ -9,14 +9,24 @@ SWORD2-compliant server for many transactions.
 See Section 10. Deposit Receipt: http://sword-app.svn.sourceforge.net/viewvc/sword-app/spec/trunk/SWORDProfile.html?revision=HEAD#depositreceipt
 
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 
-from sword2_logging import logging
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import bytes
+from builtins import *
+from builtins import object
+from .sword2_logging import logging
 d_l = logging.getLogger(__name__)
 
-from atom_objects import Category
+from .atom_objects import Category
 
-from compatible_libs import etree
-from utils import NS, get_text
+from .compatible_libs import etree
+from .utils import NS, get_text
 
 class Deposit_Receipt(object):
     def __init__(self, xml_deposit_receipt=None, dom=None, response_headers={}, location=None, code=0):
@@ -131,7 +141,7 @@ Availible attributes:
                 # convert the string to a byte array so that it doesn't matter whether it has encoding declared or not
                 self.dom = etree.fromstring(bytes(xml_deposit_receipt))
                 self.parsed = True    
-            except Exception, e:
+            except Exception as e:
                 d_l.error("Was not able to parse the deposit receipt as XML.")
                 return
         elif dom != None:
@@ -190,7 +200,7 @@ Availible attributes:
     def handle_metadata(self):
         """Method that walks the `etree.SubElement`, assigning the information to the objects attributes."""
         for e in self.dom.getchildren():
-            for nmsp, prefix in NS.iteritems():
+            for nmsp, prefix in NS.items():
                 if str(e.tag).startswith(prefix % ""):
                     _, tagname = e.tag.rsplit("}", 1)
                     field = "%s_%s" % (nmsp, tagname)
@@ -200,7 +210,7 @@ Availible attributes:
                     elif field == "atom_content":
                         self.handle_content(e)
                     elif field == "atom_generator":
-                        for ak,av in e.attrib.iteritems():
+                        for ak,av in e.attrib.items():
                             if not e.text:
                                 e.text = ""
                             e.text += " %s:\"%s\"" % (ak, av)
@@ -218,7 +228,7 @@ Availible attributes:
                             self.summary = e.text
                         if field == "atom_category":
                             self.categories.append(Category(dom=e))
-                        if self.metadata.has_key(field):
+                        if field in self.metadata:
                             if isinstance(self.metadata[field], list):
                                 self.metadata[field].append(e.text)
                             else:
@@ -253,10 +263,10 @@ Availible attributes:
                     
             # Put all links into .links attribute, with all element attribs
             attribs = {}
-            for k,v in e.attrib.iteritems():
+            for k,v in e.attrib.items():
                 if k != "rel":
                     attribs[k] = v
-            if self.links.has_key(rel): 
+            if rel in self.links: 
                 self.links[rel].append(attribs)
             else:
                 self.links[rel] = [attribs]            
@@ -269,7 +279,7 @@ Availible attributes:
     def handle_content(self, e):
         """Method to intepret the <atom:content> elements."""
         # eg <content type="application/zip" src="http://swordapp.org/cont-IRI/43/my_deposit"/>
-        if e.attrib.has_key("src"):
+        if "src" in e.attrib:
             src = e.attrib['src']
             info = dict(e.attrib).copy()
             del info['src']
@@ -300,6 +310,6 @@ Availible attributes:
             _s.append("SWORD2 Package formats available: %s" % self.packaging)
         if self.alternate:
             _s.append("Alternate IRI: %s" % self.alternate)
-        for k, v in self.links.iteritems():
+        for k, v in self.links.items():
             _s.append("Link rel:'%s' -- %s" % (k, v))
         return "\n".join(_s)

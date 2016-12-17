@@ -3,8 +3,15 @@
 """
 Dictionary of SWORD2-specific IRI errors to simple description and expected accompanying HTTP codes.
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 
-from sword2_logging import logging
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from .sword2_logging import logging
 sworderror_l = logging.getLogger(__name__)
 
 SWORD2ERRORSBYNAME = {}
@@ -52,12 +59,12 @@ SWORD2ERRORSBYNAME["UNKNOWNERROR"] = { "name":"UNKNOWNERROR",
                                        "description":"Error IRI is not within the SWORD2 specification and so, is not enumerated by this constant",
                                        "codes":[] }
 
-for k,v in SWORD2ERRORSBYNAME.iteritems():
+for k,v in SWORD2ERRORSBYNAME.items():
     SWORD2ERRORSBYIRI[v['IRI']] = v
 
 def get_error(iri, code=None):
     sworderror_l.debug("Attempting to match %s to a known SWORD2 error IRI" % iri)
-    if iri in SWORD2ERRORSBYIRI.keys():
+    if iri in list(SWORD2ERRORSBYIRI.keys()):
         if code != None:
             if code in SWORD2ERRORSBYIRI[iri]['codes']:
                 sworderror_l.info("Matched '%s' to a known SWORD2 error IRI, and HTTP response code is one of the IRI's' expected response codes." % iri)

@@ -3,11 +3,18 @@
 """
 Provides a convenience class for handling and parsing Error Document responses.
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 
-from deposit_receipt import Deposit_Receipt
-from server_errors import SWORD2ERRORSBYIRI, get_error
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
+from .deposit_receipt import Deposit_Receipt
+from .server_errors import SWORD2ERRORSBYIRI, get_error
 
-from sword2_logging import logging
+from .sword2_logging import logging
 ed_l = logging.getLogger(__name__)
 
 class Error_Document(Deposit_Receipt):
@@ -63,12 +70,12 @@ The server SHOULD specify that the Content-Type of the is text/xml or applicatio
         self._characterise_error()
     
     def _characterise_error(self):
-        if "sword_verboseDescription" in self.metadata.keys():
+        if "sword_verboseDescription" in list(self.metadata.keys()):
             self.verbose_description = self.metadata['sword_verboseDescription']
         
         if self.dom != None:
             ed_l.debug("Error response contains document content")
-            if "href" in self.dom.attrib.keys():
+            if "href" in list(self.dom.attrib.keys()):
                 self.error_href = self.dom.attrib['href']
                 self.error_info = get_error(self.error_href, self.code)
         else:

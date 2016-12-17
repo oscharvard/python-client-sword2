@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 from . import TestController
 
 from sword2.error_document import Error_Document
@@ -65,7 +72,7 @@ class TestEntry(TestController):
         assert error_d.title == "ERROR"
         assert error_d.summary == """The manifest could be parsed, but was not valid - 
     no technical metadata was provided."""
-        print error_d.metadata
+        print(error_d.metadata)
         assert error_d.verbose_description[0].strip() == """Exception at [ ... ]""", error_d.verbose_description
         
     def test_02_error_info(self):

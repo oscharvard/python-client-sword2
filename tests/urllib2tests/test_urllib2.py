@@ -1,3 +1,10 @@
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 from . import TestController
 from sword2 import Connection, Entry, Error_Document, Atom_Sword_Statement, Ore_Sword_Statement, UrlLib2Layer
 from sword2.compatible_libs import etree

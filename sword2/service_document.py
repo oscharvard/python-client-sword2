@@ -49,14 +49,23 @@ SWORD: Accept Packaging: '['http://purl.org/net/sword/package/SimpleZip', 'http:
 SWORD: Nested Service Documents - 'http://swordapp.org/sd-iri/e4'
 
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 
-from sword2_logging import logging
+from future import standard_library
+standard_library.install_aliases()
+from builtins import str
+from builtins import *
+from builtins import object
+from .sword2_logging import logging
 sd_l = logging.getLogger(__name__)
 
-from collection import SDCollection
+from .collection import SDCollection
 
-from compatible_libs import etree
-from utils import NS, get_text
+from .compatible_libs import etree
+from .utils import NS, get_text
 
 class ServiceDocument(object):
     def __init__(self, xml_response=None, sd_uri=None):
@@ -82,7 +91,7 @@ class ServiceDocument(object):
             self.valid = self.validate()
             sd_l.info("Initial SWORD2 validation checks on service document - Valid document? %s" % self.valid)
             self._enumerate_workspaces()
-        except Exception, e:
+        except Exception as e:
             # Due to variability of underlying etree implementations, catching all
             # exceptions...
             sd_l.error("Could not parse the Service Document response from the server - %s" % e)

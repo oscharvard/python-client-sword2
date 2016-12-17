@@ -3,7 +3,14 @@
 """
 Provides various Exception classes to match HTTP error code responses.
 """
+from __future__ import unicode_literals
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
 
+from future import standard_library
+standard_library.install_aliases()
+from builtins import *
 class HTTPResponseError(Exception):
     """Generic exception for http codes greater than 399 and less than 599 """
     def __init__(self, response=None, content=None):
