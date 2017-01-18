@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This module provides `Deposit_Receipt`, a convenient class for extracting information from the Deposit Receipts sent back by the 
+This module provides `Deposit_Receipt`, a convenient class for extracting information from the Deposit Receipts sent back by the
 SWORD2-compliant server for many transactions.
 
 #BETASWORD2URL
@@ -31,7 +31,7 @@ from .utils import NS, get_text
 class Deposit_Receipt(object):
     def __init__(self, xml_deposit_receipt=None, dom=None, response_headers={}, location=None, code=0):
         """
-`Deposit_Receipt` - provides convenience methods for extracting information from the Deposit Receipts sent back by the 
+`Deposit_Receipt` - provides convenience methods for extracting information from the Deposit Receipts sent back by the
 SWORD2-compliant server for many transactions.
 
 #BETASWORD2URL
@@ -40,7 +40,7 @@ See Section 10. Deposit Receipt: http://sword-app.svn.sourceforge.net/viewvc/swo
 Transactions carried out by `sword2.Connection` will return a `Deposit_Receipt` object, if a deposit receipt document is sent back by the server.
 
 Usage:
-    
+
 >>> from sword2 import Deposit_Receipt
 
 .... get the XML text for a Deposit Receipt in the variable `doc`
@@ -53,14 +53,14 @@ Usage:
 >>> assert dr.valid == True
 
 Availible attributes:
-    
+
     Atom convenience attribs -- corresponds to (type of object that is held)
     `self.title`            -- <atom:title>   (`str`)
     `self.id`               -- <id>           (`str`)
     `self.updated`          -- <updated>      (`str`)
     `self.summary`          -- <atom:summary> (`str`)
     `self.categories`       -- <category>     (`list` of `sword2.Category`)
-        
+
     IRI/URIs
     `self.edit`             -- The Edit-IRI         (`str`)
                                 <link rel="edit">
@@ -71,41 +71,41 @@ Availible attributes:
     `self.alternate`        -- A link which, according to the spec,                     (`str`)
                                "points to the splash page of the item on the server"
     `self.se_iri`           -- The SWORD2 Edit IRI (SE-IRI), defined by                 (`str`)
-                                <link rel="http://purl.org/net/sword/terms/add"> 
+                                <link rel="http://purl.org/net/sword/terms/add">
                                 which MAY be the same as the Edit-IRI
 
     `self.cont_iri`         -- The Content-IRI     (`str`)
                                 eg `src` from <content type="application/zip" src="http://swordapp.org/cont-IRI/43/my_deposit"/>
     `self.content`          -- All Content-IRIs    (`dict` with the src or Content-IRI as the key, with a `dict` of the other attributes as its value
-    
-    `self.links`            -- All links elements in a `dict`, with the 'rel' value being used as its key. The values of this are `list`s 
+
+    `self.links`            -- All links elements in a `dict`, with the 'rel' value being used as its key. The values of this are `list`s
                                 with a `dict` of attributes for each item, corresponding to the information in a single <link> element.
-                                
+
                                 SWORD2 links for "http://purl.org/net/sword/terms/originalDeposit" and "http://purl.org.net/sword/terms/derivedResource"
                                 are to be found in `self.links`
-                                
+
                                 eg
                                 >>> dr.links.get("http://purl.org.net/sword/terms/derivedResource")
                                 {'href': "....", 'type':'application/pdf'}
-    
+
 
     General metadata:
-    `self.metadata`         -- Simple metadata access. 
+    `self.metadata`         -- Simple metadata access.
                                 A `dict` where the keys are equivalent to the prefixed element names, with an underscore(_) replacing the colon (:)
                                 eg "<dcterms:title>" in the deposit receipt would be accessible in this attribute, under
                                 the key of 'dcterms_title'
-                                
+
                                 eg
                                 >>> dr.metadata.get("dcterms_title")
                                 "The Origin of Species"
-                                
+
                                 >>> dr.metadata.get("dcterms_madeupelement")
                                 `None`
-    
+
     `self.packaging`        -- sword:packaging elements declaring the formats that the Media Resource can be retrieved in   (`list` of `str`)
-    
+
     `self.response_headers` -- The HTTP response headers that accompanied this receipt
-    
+
     `self.location`         -- The location, if given (from HTTP Header: "Location: ....")
     """
         self.dom = None     # this will be populated below
@@ -121,7 +121,7 @@ Availible attributes:
         self.edit_media = None
         self.edit_media_feed = None
         self.alternate = None
-        self.se_iri = None 
+        self.se_iri = None
         self.atom_statement_iri = None
         self.ore_statement_iri = None
         # Atom convenience attribs
@@ -129,25 +129,26 @@ Availible attributes:
         self.id = None
         self.updated = None
         self.summary = None
-        
+
         self.packaging = []
         self.categories = []
         self.content = {}
         self.cont_iri = None
-        
+
         # first construct or set the dom
         if xml_deposit_receipt:
+            parse_me = xml_deposit_receipt if isinstance(xml_deposit_receipt, (bytes, bytearray,)) else bytes(xml_deposit_receipt, 'utf-8')
             try:
-                # convert the string to a byte array so that it doesn't matter whether it has encoding declared or not
-                self.dom = etree.fromstring(bytes(xml_deposit_receipt))
-                self.parsed = True    
+                self.dom = etree.fromstring(parse_me)
+                self.parsed = True
             except Exception as e:
                 d_l.error("Was not able to parse the deposit receipt as XML.")
+                import pdb;pdb.set_trace()
                 return
         elif dom != None:
             self.dom = dom
             self.parsed = True
-        
+
         # allow for the possibility that we are not given a body for the deposit
         # receipt (explicitly allowed by the spec)
         if self.dom != None:
@@ -157,23 +158,23 @@ Availible attributes:
             # and that will almost always fail the validation)
             self.valid = self.validate()
             d_l.info("Initial SWORD2 validation checks on deposit receipt - Valid document? %s" % self.valid)
-            
+
             # finally, handle the metadata
             self.handle_metadata()
-    
+
     def validate(self):
         valid = True
-        
+
         # LINK REQUIREMENTS
-        
+
         # It MUST contain a Media Entry IRI (Edit-IRI), defined by atom:link@rel="edit"
         has_edit = False
         # It MUST contain a Media Resource IRI (EM-IRI), defined by atom:link@rel="edit-media"
         has_em = False
-        # It MUST contain a SWORD Edit IRI (SE-IRI), defined by atom:link@rel=""" 
+        # It MUST contain a SWORD Edit IRI (SE-IRI), defined by atom:link@rel="""
         # which MAY be the same as the Edit-IRI
         has_se = False
-        
+
         links = self.dom.findall(NS['atom'] % "link")
         for link in links:
             rel = link.get("rel")
@@ -183,20 +184,20 @@ Availible attributes:
                 has_em = True
             elif rel == "http://purl.org/net/sword/terms/add":
                 has_se = True
-        
+
         if not has_edit or not has_em or not has_se:
             d_l.debug("Validation Fail: has_edit: " + str(has_edit) + "; has_em: " + str(has_em) + "; has_se: " + str(has_se))
             valid = False
-        
-        # It MUST contain a single sword:treatment element [SWORD003] which contains either a human-readable 
+
+        # It MUST contain a single sword:treatment element [SWORD003] which contains either a human-readable
         # statement describing treatment the deposited resource has received or a IRI that dereferences to such a description.
         treatment = self.dom.findall(NS['sword'] % "treatment")
         if treatment == None or len(treatment) == 0:
             d_l.debug("Validation Fail: no treatment or treatment invalid: " + str(treatment))
             valid = False
-        
+
         return valid
-    
+
     def handle_metadata(self):
         """Method that walks the `etree.SubElement`, assigning the information to the objects attributes."""
         for e in self.dom.getchildren():
@@ -235,7 +236,7 @@ Availible attributes:
                                 self.metadata[field] += [e.text]
                         else:
                             self.metadata[field] = [e.text]
-                    
+
     def handle_link(self, e):
         """Method that handles the intepreting of <atom:link> element information and placing it into the anticipated attributes."""
         # MUST have rel
@@ -260,22 +261,22 @@ Availible attributes:
                     self.atom_statement_iri = e.attrib.get('href', None)
                 elif t is not None and t == "application/rdf+xml":
                     self.ore_statement_iri = e.attrib.get('href', None)
-                    
+
             # Put all links into .links attribute, with all element attribs
             attribs = {}
             for k,v in e.attrib.items():
                 if k != "rel":
                     attribs[k] = v
-            if rel in self.links: 
+            if rel in self.links:
                 self.links[rel].append(attribs)
             else:
-                self.links[rel] = [attribs]            
-    
+                self.links[rel] = [attribs]
+
     def _normalise_mime(self, mime):
         if mime is None:
             return None
         return mime.lower().replace(" ", "")
-        
+
     def handle_content(self, e):
         """Method to intepret the <atom:content> elements."""
         # eg <content type="application/zip" src="http://swordapp.org/cont-IRI/43/my_deposit"/>
@@ -285,15 +286,15 @@ Availible attributes:
             del info['src']
             self.content[src] = info
             self.cont_iri = src
-            
+
     def to_xml(self):
         """Convenience method for outputing the DOM as a (byte)string."""
         return etree.tostring(self.dom)
-    
+
     def __str__(self):
         """Method for producing a human-readable report about the information in this object, suitable
         for CLI or other logging.
-        
+
         NB does not report all information, just key parts."""
         _s = []
         for k in sorted(self.metadata.keys()):

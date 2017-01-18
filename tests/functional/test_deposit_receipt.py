@@ -51,21 +51,21 @@ DR = """<?xml version="1.0" ?>
     <link rel="http://purl.org/net/sword/terms/add" href="http://www.swordserver.ac.uk/col1/mydeposit.atom" />
     <sword:packaging>http://purl.org/net/sword/package/BagIt</sword:packaging>
 
-    <link rel="http://purl.org/net/sword/terms/originalDeposit" 
-            type="application/zip" 
+    <link rel="http://purl.org/net/sword/terms/originalDeposit"
+            type="application/zip"
             href="http://www.swordserver.ac.uk/col1/mydeposit/package.zip"/>
-    <link rel="http://purl.org/net/sword/terms/derivedResource" 
-            type="application/pdf" 
+    <link rel="http://purl.org/net/sword/terms/derivedResource"
+            type="application/pdf"
             href="http://www.swordserver.ac.uk/col1/mydeposit/file1.pdf"/>
-    <link rel="http://purl.org/net/sword/terms/derivedResource" 
-            type="application/pdf" 
+    <link rel="http://purl.org/net/sword/terms/derivedResource"
+            type="application/pdf"
             href="http://www.swordserver.ac.uk/col1/mydeposit/file2.pdf"/>
 
-    <link rel="http://purl.org/net/sword/terms/statement" 
-            type="application/atom+xml;type=feed" 
+    <link rel="http://purl.org/net/sword/terms/statement"
+            type="application/atom+xml;type=feed"
             href="http://www.swordserver.ac.uk/col1/mydeposit.feed"/>
-    <link rel="http://purl.org/net/sword/terms/statement" 
-            type="application/rdf+xml" 
+    <link rel="http://purl.org/net/sword/terms/statement"
+            type="application/rdf+xml"
             href="http://www.swordserver.ac.uk/col1/mydeposit.rdf"/>
 
 
@@ -79,12 +79,12 @@ class TestDepositReceipt(TestController):
         assert dr.id == "info:something:1"
         assert dr.title == "My Deposit"
         assert dr.metadata['sword_verboseDescription'][0] == "Verbose description"
-        
+
     def test_02_edit(self):
         dr = Deposit_Receipt(DR)
         assert dr.edit == "http://www.swordserver.ac.uk/col1/mydeposit.atom"
         assert dr.edit_media == "http://www.swordserver.ac.uk/col1/mydeposit"
-        
+
     def test_03_content_iri(self):
         dr = Deposit_Receipt(DR)
         assert dr.edit == "http://www.swordserver.ac.uk/col1/mydeposit.atom"
@@ -92,9 +92,8 @@ class TestDepositReceipt(TestController):
         assert dr.content["http://www.swordserver.ac.uk/col1/mydeposit"]['type'] == "application/zip"
         # Check convenience attribute 'cont_iri'
         assert dr.cont_iri == "http://www.swordserver.ac.uk/col1/mydeposit"
-        
+
     def test_04_packaging(self):
         dr = Deposit_Receipt(DR)
         assert "http://purl.org/net/sword/package/BagIt" in dr.packaging
         assert len(dr.packaging) == 1
-    

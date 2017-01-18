@@ -81,7 +81,7 @@ class HttpLib2Layer(HttpLayer):
         resp, content = self.h.request(uri, method, headers=headers, body=payload)
         return (HttpLib2Response(resp), content)
 
-################################################################################    
+################################################################################
 # Guest urllib2 implementation
 ################################################################################
 
@@ -91,9 +91,10 @@ class PreemptiveBasicAuthHandler(urllib.request.HTTPBasicAuthHandler):
     def __init__(self, username, password):
         self.username = username
         self.password = password
+        self.passwd = password
 
     def http_request(self, request):
-        request.add_header(self.auth_header, 'Basic %s' % base64.b64encode(self.username + ':' + self.password))
+        request.add_header(self.auth_header, b'Basic %s' % base64.b64encode(b':'.join([x.encode() for x in (self.username, self.password,)])))
         return request
 
     https_request = http_request
@@ -129,8 +130,8 @@ class UrlLib2Response(HttpResponse):
 import urllib2
 import mmap
 
-# Open the file as a memory mapped string. Looks like a string, but 
-# actually accesses the file behind the scenes. 
+# Open the file as a memory mapped string. Looks like a string, but
+# actually accesses the file behind the scenes.
 f = open('somelargefile.zip','rb')
 mmapped_file_as_string = mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ)
 
